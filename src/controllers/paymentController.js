@@ -1,0 +1,53 @@
+const db = require('../models/db');
+const Razorpay = require('razorpay');
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_RIyjeTmNCvUynj',
+  key_secret: 'oGOOxmpBBSlBts5WHmDWoekd'
+});
+
+exports.createOrder = async (req, res) => {
+  const { totalAmount } = req.body;
+  const options = {
+    amount: totalAmount * 100,
+    currency: "INR",
+    receipt: "receipt_order_" + Date.now()
+  };
+  try {
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.verifyPayment = (req, res) => {
+  const { paymentId, orderId, signature } = req.body;
+  res.json({
+    message: 'Payment verified (stub)',
+    paymentId,
+    orderId,
+    signature
+  });
+};
+
+exports.handleWebhook = (req, res) => {
+  console.log('Webhook received:', req.body); // For debugging
+
+  const event = req.body;
+  const payment_id = event.payload?.payment?.entity?.id || null;
+  const order_id = event.payload?.payment?.entity?.order_id || null;
+  const status = event.event || null;
+  const amount = event.payload?.payment?.entity?.amount || null;
+
+  db.query(
+    'INSERT INTO payments (payment_id, order_id, status, amount, event) VALUES (?, ?, ?, ?, ?)',
+    [payment_id, order_id, status, amount, JSON.stringify(event)],
+    (err) => {
+      if (err) {
+        console.error('DB Error:', err);
+        return res.status(500).json({ message: 'DB error' });
+      }
+      res.status(200).json({ message: 'Webhook received and stored' });
+    }
+  );
+};
