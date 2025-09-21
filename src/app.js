@@ -3,7 +3,10 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'razorpay-frontend-axwz-ratho6qj2-nivetha-vs-projects-9b5456c8.vercel.app', // Replace with your actual Vercel URL
+  credentials: true,
+}));
 app.use(express.json());
 
 // Add this line BEFORE your routes
@@ -21,6 +24,17 @@ app.get('/api/test-db', (req, res) => {
     }
     res.json({ success: true, results });
   });
+});
+
+app.get('/api/test-insert', (req, res) => {
+  db.query(
+    "INSERT INTO payments (payment_id, order_id, status, amount, event) VALUES (?, ?, ?, ?, ?)",
+    ["test_id", "test_order", "test_status", 123, JSON.stringify({test: true})],
+    (err, results) => {
+      if (err) return res.status(500).json({ success: false, error: err.message });
+      res.json({ success: true, results });
+    }
+  );
 });
 
 const PORT = process.env.PORT || 5000;
