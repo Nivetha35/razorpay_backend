@@ -4,8 +4,8 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors({
-  origin: 'razorpay-frontend-axwz-ratho6qj2-nivetha-vs-projects-9b5456c8.vercel.app', // Replace with your actual Vercel URL
-  credentials: true,
+  origin: "https://razorpay-frontend-axwz-ratho6qj2-nivetha-vs-projects-9b5456c8.vercel.app", // your actual Vercel frontend URL
+  credentials: true
 }));
 app.use(express.json());
 
