@@ -32,22 +32,5 @@ exports.verifyPayment = (req, res) => {
 
 exports.handleWebhook = (req, res) => {
   console.log('Webhook received:', req.body);
-
-  const event = req.body;
-  const payment_id = event.payload?.payment?.entity?.id || null;
-  const order_id = event.payload?.payment?.entity?.order_id || null;
-  const status = event.event || null;
-  const amount = event.payload?.payment?.entity?.amount || null;
-
-  db.query(
-    "INSERT INTO payments (payment_id, order_id, status, amount, event) VALUES (?, ?, ?, ?, ?)",
-    [payment_id, order_id, status, amount, JSON.stringify(event)],
-    (err, results) => {
-      if (err) {
-        console.error("DB Insert Error:", err);
-        return res.status(500).json({ success: false, error: err.message });
-      }
-      res.json({ success: true });
-    }
-  );
+  // ...insert logic...
 };
