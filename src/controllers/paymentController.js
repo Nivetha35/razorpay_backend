@@ -2,13 +2,14 @@ const db = require('../models/db');
 const Razorpay = require('razorpay');
 const razorpay = new Razorpay({
   key_id: 'rzp_test_RIyjeTmNCvUynj',
-  key_secret: 'oFOR '
+  key_secret: 'oGOOxmpBBSlBts5WHmDWoekd'
 });
 
 exports.createOrder = async (req, res) => {
-  const { totalAmount } = req.body;
+  const totalAmount = req.body.totalAmount; // already in paise
+
   const options = {
-    amount: totalAmount * 100,
+    amount: totalAmount, // use as-is
     currency: "INR",
     receipt: "receipt_order_" + Date.now()
   };
@@ -32,5 +33,22 @@ exports.verifyPayment = (req, res) => {
 
 exports.handleWebhook = (req, res) => {
   console.log('Webhook received:', req.body);
-  // ...insert logic...
+
+  const event = req.body;
+  const payment_id = event.payload?.payment?.entity?.id || null;
+  const order_id = event.payload?.payment?.entity?.order_id || null;
+  const status = event.event || null;
+  const amount = event.payload?.payment?.entity?.amount || null;
+
+  db.query(
+    "INSERT INTO payments (payment_id, order_id, status, amount, event) VALUES (?, ?, ?, ?, ?)",
+    [payment_id, order_id, status, amount, JSON.stringify(event)],
+    (err, results) => {
+      if (err) {
+        console.error("DB Insert Error:", err);
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      res.json({ success: true });
+    }
+  );
 };

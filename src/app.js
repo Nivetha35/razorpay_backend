@@ -4,7 +4,10 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors({
-  origin: "https://razorpay-frontend-axwz-ratho6qj2-nivetha-vs-projects-9b5456c8.vercel.app", // your actual Vercel frontend URL
+  origin: [
+    "https://razorpay-frontend-axwz-hc5a1eug6-nivetha-vs-projects-9b5456c8.vercel.app",
+    "https://razorpay-frontend-axwz-ratho6qj2-nivetha-vs-projects-9b5456c8.vercel.app"
+  ],
   credentials: true
 }));
 app.use(express.json());
@@ -12,8 +15,7 @@ app.use(express.json());
 // Add this line BEFORE your routes
 app.use('/api/payment/webhook', express.json({ type: '*/*' }));
 
-const paymentRoutes = require('./routes/paymentRoutes');
-app.use('/api/payment', paymentRoutes);
+app.use('/api/payment', require('./routes/paymentRoutes'));
 
 const db = require('./models/db');
 
